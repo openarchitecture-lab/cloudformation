@@ -1,12 +1,23 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
 
-"Mappings" : {
-    "RegionMap" : {
-      "us-east-1"        : {"HVM64" : "ami-0742b4e673072066f", "HVMG2" : "ami-0a584ac55a7631c0c"},
-      "us-east-2"        : {"HVM64" : "ami-05d72852800cbf29e", "HVMG2" : "ami-066ee5fd4a9ef77f1"},
-      "eu-west-1"        : {"HVM64" : "ami-0577b787189839998", "HVMG2" : "ami-0a7c483d527806435"},
-    }
+Mappings:
+  RegionMap: 
+    us-east-1:
+      HVM64: ami-0742b4e673072066f
+      HVMG2: ami-0a584ac55a7631c0c
+      SG: sg_ec2_sales_test
+      KEYPAIR: cf_ec2_keypair  
+    us-east-2:
+      HVM64: ami-05d72852800cbf29e
+      HVMG2: ami-066ee5fd4a9ef77f1
+      SG: sg_ec2_sales_test_east
+      KEYPAIR: cf_ec2_keypair_east
+    us-west-1:
+      HVM64: ami-0577b787189839998
+      HVMG2: ami-0a7c483d527806435
+      SG: sg_ec2_sales_test
+      KEYPAIR: cf_ec2_keypair  
 
 Parameters:
   InstanceTypeParameter:
@@ -23,10 +34,10 @@ Resources:
     Properties:
       InstanceType:
         Ref: InstanceTypeParameter
-      ImageId:!FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
-      KeyName: cf_ec2_keypair
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
+      KeyName: !FindInMap [RegionMap, !Ref "AWS::Region", KEYPAIR]
       SecurityGroupIds:
-        - sg_ec2_sales_test
+        - !FindInMap [RegionMap, !Ref "AWS::Region", SG]
       UserData:
          Fn::Base64: !Sub |
            #!/bin/bash -xe
