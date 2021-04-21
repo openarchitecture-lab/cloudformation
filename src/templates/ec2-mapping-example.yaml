@@ -1,0 +1,45 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+"Mappings" : {
+    "RegionMap" : {
+      "us-east-1"        : {"HVM64" : "ami-0742b4e673072066f", "HVMG2" : "ami-0a584ac55a7631c0c"},
+      "us-east-2"        : {"HVM64" : "ami-05d72852800cbf29e", "HVMG2" : "ami-066ee5fd4a9ef77f1"},
+      "eu-west-1"        : {"HVM64" : "ami-0577b787189839998", "HVMG2" : "ami-0a7c483d527806435"},
+    }
+
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro.
+Resources:
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: InstanceTypeParameter
+      ImageId:!FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
+      KeyName: cf_ec2_keypair
+      SecurityGroupIds:
+        - sg_ec2_sales_test
+      UserData:
+         Fn::Base64: !Sub |
+           #!/bin/bash -xe
+           yum update -y aws-cfn-bootstrap
+           yum install -y httpd
+           sudo service httpd start
+Outputs:
+  MyWebInstanceID:
+    Description: The Instance ID
+    Value: !Ref WebInstance
+  publicIp:
+    Description: The Public IP Address IP
+    Value: !GetAtt WebInstance.PublicIp
+  Status:
+    Description: Stauts
+    Value: "Very Good"
